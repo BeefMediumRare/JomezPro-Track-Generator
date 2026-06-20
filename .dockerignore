@@ -1,0 +1,7 @@
+.git
+.cache
+calibration
+tracks
+*.pyc
+__pycache__
+.venv

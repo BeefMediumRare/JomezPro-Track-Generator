@@ -1,0 +1,14 @@
+services:
+  trackgen:
+    build: .
+    volumes:
+      # Output and working folders, so results land on the host.
+      - ./tracks:/app/tracks
+      - ./assets:/app/assets
+      - ./.cache:/app/.cache
+      - ./calibration:/app/calibration
+      # The extension repo, read-only, so validateTrack can check the output.
+      # Adjust the host path if your checkout lives elsewhere.
+      - ../Ain-t-Nobody-Got-Time-for-That:/opt/extension:ro
+    environment:
+      - EXT_PARSER_PATH=/opt/extension/src/parser.js
