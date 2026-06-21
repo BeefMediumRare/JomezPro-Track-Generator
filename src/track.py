@@ -53,6 +53,7 @@ def speed_for_kind(kind, round_bucket, nine, cfg):
         "hole": cfg.speed_default,
         "throw": cfg.speed_throw,
         "leaderboard": cfg.speed_leaderboard,
+        "sponsor": cfg.speed_skip,
     }.get(kind, cfg.speed_default)
 
 

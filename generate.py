@@ -21,12 +21,17 @@ import sys
 
 from src.config import CONFIG
 from src import download, frames, detect, track
-from src.sections import build_sections, add_hole_previews, add_throws, throw_ends, is_hole_chapter
+from src.sections import (build_sections, add_hole_previews, add_throws, add_sponsors,
+                          throw_ends, is_hole_chapter)
 from src.track import format_timestamp
 
 
 def _frames_dir(cfg, video_id):
     return os.path.join(cfg.cache_dir, "frames", video_id)
+
+
+def _tl_dir(cfg, video_id):
+    return os.path.join(cfg.cache_dir, "frames_tl", video_id)
 
 
 def cmd_generate(url_or_id):
@@ -75,6 +80,26 @@ def cmd_generate(url_or_id):
             print(f"  player card seen in {len(present['throw'])} of {len(fr)} frames, "
                   f"{len(ends)} throws (look-ahead)")
             analysis.sections = add_throws(analysis.sections, present["throw"], signals, cfg)
+
+            # Sponsor blocks: the tournament logo (top-left) vanishes during baked-in
+            # ads. Derive the logo from play frames spread across the whole video
+            # (different holes = different backgrounds, so only the logo is constant),
+            # then scan.
+            present_secs = sorted(present["throw"])
+            if present_secs:
+                tl = frames.extract_top_left(meta["video_path"], _tl_dir(cfg, meta["video_id"]), cfg)
+                tl_map = dict(tl)
+                step = max(1, len(present_secs) // cfg.logo_sample_count)
+                sample = [(s, tl_map[s]) for s in present_secs[::step] if s in tl_map]
+                logo = detect.derive_logo(sample, cfg)
+                if logo:
+                    presence = detect.logo_presence(tl, logo, cfg)
+                    analysis.sections = add_sponsors(analysis.sections, presence, cfg)
+                    n = sum(1 for s in analysis.sections if s.kind == "sponsor")
+                    print(f"  tournament logo derived (hue {logo['hue']}); {n} sponsor block(s)")
+                else:
+                    print("  WARNING: couldn't derive the tournament logo (static first "
+                          "block?); skipping sponsor detection.", file=sys.stderr)
 
     print("Sections:")
     for s in analysis.sections:

@@ -219,6 +219,63 @@ def add_throws(sections, present_seconds, signals, cfg):
     return out
 
 
+def _smooth(presence, window):
+    """Rolling mean of a [(second, value)] signal over `window` seconds."""
+    vals = {s: v for s, v in presence}
+    out = []
+    for s, v in presence:
+        win = [vals[t] for t in range(s - window + 1, s + 1) if t in vals]
+        out.append((s, sum(win) / len(win) if win else v))
+    return out
+
+
+def logo_absence_runs(presence, cfg):
+    """Contiguous spans where the smoothed logo presence stays below the threshold.
+    The minimum-length check is NOT applied here — it's applied per sponsor segment
+    in add_sponsors, after a run has been clipped to a hole and split by previews,
+    so a short leftover beside a preview doesn't pass on the strength of the long
+    run it came from."""
+    smoothed = _smooth(presence, cfg.sponsor_window)
+    absent = sorted(s for s, v in smoothed if v < cfg.logo_present_threshold)
+    runs = []
+    for s in absent:
+        if runs and s - runs[-1][1] <= 1:
+            runs[-1][1] = s
+        else:
+            runs.append([s, s])
+    return [(a, b) for a, b in runs]
+
+
+def add_sponsors(sections, presence, cfg):
+    """Split HOLE sections where the tournament logo is absent (a baked-in ad) into
+    'sponsor' segments. Only 'hole' sections are touched, so this never fires inside
+    a preview (the logo is gone there too, but it's already its own kind) or outside
+    the holes — and clipping to the section's end naturally ends a sponsor at the
+    next hole's chapter start. A segment counts as a sponsor only if it lasts at
+    least sponsor_min_absent (ads are long; a brief ambience shot between the
+    preview and the throws is not). Pure: takes the presence signal."""
+    runs = logo_absence_runs(presence, cfg)
+    out = []
+    for s in sections:
+        if s.kind != "hole":
+            out.append(s)
+            continue
+        local = [(max(a, s.start), min(b, s.end)) for (a, b) in runs
+                 if min(b, s.end) - max(a, s.start) >= cfg.sponsor_min_absent]
+        if not local:
+            out.append(s)
+            continue
+        cur = s.start
+        for (a, b) in local:
+            if a > cur:
+                out.append(Section(cur, a, "hole", s.label))
+            out.append(Section(max(a, cur), b, "sponsor", s.label))
+            cur = b
+        if cur < s.end:
+            out.append(Section(cur, s.end, "hole", s.label))
+    return out
+
+
 def build_sections(duration, chapters, title=""):
     """Classify a video into a SectionAnalysis (sections + detected round + nine)."""
     rnd = classify_round(title)

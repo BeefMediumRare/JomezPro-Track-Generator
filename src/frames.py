@@ -46,3 +46,17 @@ def extract_for_calibration(video_path, out_dir, cfg):
     every = max(0.01, cfg.calibrate_every_sec)
     files = _extract(video_path, out_dir, _band_filter(cfg, f"fps=1/{every}"))
     return [(round(i * every), p) for i, p in enumerate(files)]
+
+
+def _top_left_filter(cfg):
+    x0, y0, x1, y1 = cfg.top_left_box
+    # Scale to the fixed height, then crop the top-left box (fractions of the frame).
+    return (f"fps={cfg.sample_fps},scale=-2:{cfg.scale_height},"
+            f"crop=iw*{x1 - x0}:ih*{y1 - y0}:iw*{x0}:ih*{y0}")
+
+
+def extract_top_left(video_path, out_dir, cfg):
+    """One top-left-corner frame per second, for tracking the tournament logo.
+    Returns [(second, path), ...]."""
+    files = _extract(video_path, out_dir, _top_left_filter(cfg))
+    return [(i, p) for i, p in enumerate(files)]

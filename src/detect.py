@@ -68,6 +68,67 @@ def detect(frames, specs):
     return present
 
 
+def derive_logo(frames_subset, cfg):
+    """Find the tournament logo in the top-left corner from a set of play frames.
+    The logo sits at a fixed spot while the background moves, so across frames its
+    pixels have low variance and the background's is high. We threshold the variance
+    map (Otsu) to a logo mask, take its bounding box, and sample the logo's hue from
+    the masked pixels (so it adapts to whatever colour the logo is this season).
+
+    frames_subset: [(second, path)], best sampled across the whole video so the
+    backgrounds differ (one static stretch would leave its background looking as
+    constant as the logo). Returns {mask, bbox, hue} or None if the logo can't be
+    told apart — too little background movement leaves the mask bloated."""
+    grays, bgrs = [], []
+    for second, path in frames_subset:
+        bgr = cv2.imread(path)
+        if bgr is None:
+            continue
+        bgrs.append(bgr)
+        grays.append(cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY).astype(np.float32))
+    if len(grays) < 5:
+        return None
+
+    std = np.stack(grays).std(0)
+    sn = (std / (std.max() + 1e-6) * 255).astype(np.uint8)
+    _, m = cv2.threshold(sn, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    mask = m > 0
+    # Sanity: the logo is a small, stable patch against a moving background. A real
+    # logo is a few percent of the corner; if the mask is much bigger, or the
+    # "background" isn't much more variable than the "logo", the camera didn't move
+    # enough to separate them and the mask is contaminated — bail.
+    if mask.sum() < 30 or mask.mean() > 0.25:
+        return None
+    if std[~mask].mean() < 1.5 * std[mask].mean():
+        return None
+
+    ys, xs = np.where(mask)
+    bbox = (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
+    hues = [cv2.cvtColor(b, cv2.COLOR_BGR2HSV)[:, :, 0][mask] for b in bgrs[::max(1, len(bgrs) // 5)]]
+    hue = int(np.median(np.concatenate(hues)))
+    return {"mask": mask, "bbox": bbox, "hue": hue}
+
+
+def logo_presence(frames, logo, cfg):
+    """Per second, the fraction of the logo's pixels that show the logo's colour.
+    High when the logo is on screen, ~0 when it's gone (an ad, a preview, a recap).
+    Returns [(second, fraction), ...]."""
+    mask = logo["mask"]
+    lo = (logo["hue"] - cfg.logo_hue_tolerance) % 180
+    hi = (logo["hue"] + cfg.logo_hue_tolerance) % 180
+    out = []
+    for second, path in frames:
+        bgr = cv2.imread(path)
+        if bgr is None:
+            continue
+        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+        h, s, v = hsv[:, :, 0][mask], hsv[:, :, 1][mask], hsv[:, :, 2][mask]
+        hue_ok = (h >= lo) & (h <= hi) if lo <= hi else (h >= lo) | (h <= hi)
+        present = hue_ok & (s >= cfg.logo_sat_min) & (v >= cfg.logo_val_min)
+        out.append((second, float(present.mean())))
+    return out
+
+
 def card_diffs(frames, boxes):
     """Mean absolute frame-to-frame difference inside each box, per second. A big
     value means that region changed. boxes: {name: box_frac}. Returns

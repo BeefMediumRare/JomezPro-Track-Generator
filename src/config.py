@@ -48,6 +48,9 @@ class Config:
     # The whole player card, diffed frame-to-frame to spot player transitions: when
     # the card rotates to the next player, everything inside changes at once.
     diff_box: tuple = (0.042, 0.563, 0.288, 0.767)
+    # Top-left corner of the full frame, where the tournament logo sits. Cropped
+    # generously; the logo's exact box is then derived from it per video.
+    top_left_box: tuple = (0.0, 0.0, 0.34, 0.30)
     # Just the THROW counter (the digits, wide enough for a par-5's 1 2 3 4 5). A
     # same-player next throw only ticks the counter — too small for the whole-card
     # diff, but obvious here.
@@ -79,6 +82,18 @@ class Config:
     # Individual throws are found by the look-ahead: each throw end (a transition,
     # or the card disappearing) plays normal speed for this many seconds before it.
     throw_lead: int = 18
+
+    # --- Sponsor blocks (baked-in ads): the tournament logo vanishes during them ---
+    # The logo is derived per video, then its presence is tracked as the fraction of
+    # logo-coloured pixels in its box. Smoothed over a window; below the threshold
+    # for long enough, inside a hole, is an ad.
+    sponsor_window: int = 5            # rolling-average window (seconds) for the signal
+    sponsor_min_absent: int = 10       # logo gone at least this long to count as an ad
+    logo_present_threshold: float = 0.3  # smoothed logo-pixel fraction below this = absent
+    logo_hue_tolerance: int = 12       # hue band (+/-) around the sampled logo hue
+    logo_sat_min: int = 50
+    logo_val_min: int = 60
+    logo_sample_count: int = 200       # play frames (spread across the video) to derive the logo from
 
     # --- Speed codes (strings, matching the track format) ---
     # 1 normal, 2 fast, 3 faster, 4 skip.
