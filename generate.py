@@ -8,15 +8,17 @@ Two commands:
 
 The track is built in two steps: identify the sections of the video, then turn
 those into a track. Sections come from the YouTube chapters (skip the intro and
-sponsor lists, normal speed for the closing leaderboard, default speed for the
-holes), and each hole's opening drone preview is found by detecting the JOMEZ PRO
-banner. Throw detection is planned next.
+sponsor lists, normal speed for the closing leaderboard), the drone previews and
+player cards (hole previews and throws), and the tournament logo vanishing (baked-in
+ads). The track lands in tracks/JomezPro/ and is validated against the extension's
+own parser.
 
-The track file lands in tracks/JomezPro/ and is validated against the extension's
-own parser. See README.md for the Docker usage.
+The video and frames are deleted after the run by default. Pass --keep-cache (or
+set KEEP_CACHE=1) to keep them for local iteration. See README.md for Docker usage.
 """
 
 import os
+import shutil
 import sys
 
 from src.config import CONFIG
@@ -34,11 +36,40 @@ def _tl_dir(cfg, video_id):
     return os.path.join(cfg.cache_dir, "frames_tl", video_id)
 
 
+def _cleanup(cfg, meta):
+    """Remove the downloaded video and extracted frames, so a run leaves nothing
+    behind. Best-effort; missing paths are fine."""
+    targets = [meta.get("video_path"),
+               _frames_dir(cfg, meta["video_id"]),
+               _tl_dir(cfg, meta["video_id"])]
+    for path in targets:
+        if not path:
+            continue
+        try:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            elif os.path.exists(path):
+                os.remove(path)
+        except OSError:
+            pass
+
+
 def cmd_generate(url_or_id):
     cfg = CONFIG
+    state = {}
+    try:
+        return _generate(cfg, url_or_id, state)
+    finally:
+        meta = state.get("meta")
+        if meta is not None and not cfg.keep_cache:
+            _cleanup(cfg, meta)
+            print("Removed the downloaded video and frames (keep_cache off).")
 
+
+def _generate(cfg, url_or_id, state):
     print(f"Fetching {url_or_id} ...")
     meta = download.fetch(url_or_id, cfg)
+    state["meta"] = meta
     print(f"  {meta['video_id']} — {meta['title']}")
     print(f"  duration {meta['duration']:.0f}s, {len(meta['chapters'])} chapters")
     if not any(is_hole_chapter(c.get("title")) for c in meta["chapters"]):
@@ -141,6 +172,9 @@ def cmd_calibrate(url_or_id):
 
 def main(argv):
     args = argv[1:]
+    if "--keep-cache" in args:
+        CONFIG.keep_cache = True
+        args = [a for a in args if a != "--keep-cache"]
     if not args:
         print(__doc__)
         return 2

@@ -18,10 +18,21 @@ def _env(name, default):
     return value if value else default
 
 
+def _env_bool(name, default):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
 @dataclass
 class Config:
     # --- Where things live (host paths are bind-mounted in Docker) ---
     cache_dir: str = field(default_factory=lambda: _env("CACHE_DIR", ".cache"))
+    # Off by default: download, process, then delete the video and frames, so a
+    # server/cron run leaves nothing behind. Turn on locally (env KEEP_CACHE=1 or
+    # --keep-cache) to reuse downloads and frames while iterating.
+    keep_cache: bool = field(default_factory=lambda: _env_bool("KEEP_CACHE", False))
     output_dir: str = field(default_factory=lambda: _env("OUTPUT_DIR", "tracks/JomezPro"))
     calibration_dir: str = field(default_factory=lambda: _env("CALIBRATION_DIR", "calibration"))
     hole_preview_template: str = field(default_factory=lambda: _env("HOLE_PREVIEW_TEMPLATE", "assets/hole-preview.png"))

@@ -77,6 +77,14 @@ It prints the sections and writes the track to `tracks/JomezPro/` as
 `<videoId>_<title>.json`. Point the extension at that folder (or commit it to a
 public GitHub repo and add that repo in the extension's settings).
 
+By default the run deletes the downloaded video and its frames afterwards, so it
+leaves nothing behind. While iterating locally, keep them (so a re-run skips the
+download and re-extraction):
+
+    docker compose run --rm trackgen --keep-cache "https://www.youtube.com/watch?v=VIDEO_ID"
+
+You can also set `KEEP_CACHE=1` in the environment instead of passing the flag.
+
 ## Settings
 
 The settings are in `src/config.py`. The ones you are most likely to change are
