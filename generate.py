@@ -158,7 +158,8 @@ def _generate(cfg, url_or_id, state):
     for c in cues:
         print(f"  {format_timestamp(c['t']):>7}  speed {c['code']}")
 
-    doc = track.build_track(meta["video_id"], meta["title"], cues)
+    # Title and description describe the behaviour; the filename carries the video id.
+    doc = track.build_track(meta["video_id"], track.TRACK_TITLE, cues, track.TRACK_DESCRIPTION)
     path = track.write_track(doc, cfg.output_dir)
     print(f"Wrote {path} ({len(cues)} cues)")
 

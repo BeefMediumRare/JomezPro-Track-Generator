@@ -13,6 +13,16 @@ import subprocess
 
 SCHEMA_VERSION = 1
 
+# Title and description shown in the extension. Every generated track does the same
+# thing, so these describe the behaviour, not the video (the video is identified by
+# youtubeVideoId). Time saved isn't mentioned — it depends on the viewer's own speed
+# settings, so that's the extension's to show.
+TRACK_TITLE = "Focus on Throws"
+TRACK_DESCRIPTION = (
+    "Throws play at normal speed. Holes and drone previews are sped up; "
+    "intros, sponsors and outros are skipped."
+)
+
 
 def format_timestamp(seconds):
     """Whole-second m:ss (or h:mm:ss past an hour). Mirrors parser.js."""
