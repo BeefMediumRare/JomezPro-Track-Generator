@@ -130,9 +130,11 @@ instead of `build:`, no mounts, and `pull_policy: always` so it grabs the newest
 
     docker compose -f docker-compose.server.yml up -d
 
-On Synology DSM 7.2+ this is a Container Manager **Project**: point it at this file,
-put your `GITHUB_TOKEN` in a `.env` beside it (or the Project's environment field),
-and bring it up. The image is `ghcr.io/beefmediumrare/jomezpro-track-generator:latest`.
+Copy `.env.example` to `.env` beside it and fill in `GITHUB_TOKEN` first
+(`cp .env.example .env`). On Synology DSM 7.2+ this is a Container Manager
+**Project**: point it at this file, supply the env (a `.env` in the project folder
+or the Project's environment field), and bring it up. The image is
+`ghcr.io/beefmediumrare/jomezpro-track-generator:latest`.
 
 ### How it picks videos
 
