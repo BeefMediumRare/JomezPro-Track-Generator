@@ -12,3 +12,22 @@ services:
       - ../Ain-t-Nobody-Got-Time-for-That:/opt/extension:ro
     environment:
       - EXT_PARSER_PATH=/opt/extension/src/parser.js
+
+  # Server mode: scans @JomezPro on a loop and pushes new tracks to the repo.
+  # Start it with:  docker compose up -d trackgen-server
+  # Needs a fine-grained PAT (repo Contents: read/write) in GITHUB_TOKEN — put it
+  # and any overrides in a gitignored .env file next to this one.
+  trackgen-server:
+    build: .
+    entrypoint: ["python", "serve.py"]
+    restart: unless-stopped
+    # No mounts: the assets it needs are baked into the image, and the repo is
+    # cloned fresh into the container on start. Dedup is against the published
+    # tracks (origin), not local state, so nothing needs to persist between runs.
+    environment:
+      - REPO_DIR=/repo
+      - GITHUB_TOKEN=${GITHUB_TOKEN:?set GITHUB_TOKEN in .env}
+      - SCAN_INTERVAL_SEC=${SCAN_INTERVAL_SEC:-3600}
+      - MAX_AGE_DAYS=${MAX_AGE_DAYS:-1}
+      - GIT_USER_NAME=${GIT_USER_NAME:-jomez-track-bot}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-jomez-track-bot@users.noreply.github.com}

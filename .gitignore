@@ -4,3 +4,6 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
+# Server mode: the PAT and any local overrides live here, never committed.
+.env
+.repo/

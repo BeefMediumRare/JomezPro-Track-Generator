@@ -85,6 +85,85 @@ download and re-extraction):
 
 You can also set `KEEP_CACHE=1` in the environment instead of passing the flag.
 
+## Server mode (run it unattended)
+
+The single-video command above is the whole engine. Server mode just runs it on a
+loop: every hour it checks the [@JomezPro](https://www.youtube.com/@JomezPro/videos)
+channel for new per-hole tournament coverage, makes a track for each new video, and
+commits it back to this repo so the extension picks it up.
+
+It runs on your own machine (a homelab box) rather than a hosted CI runner, for two
+reasons: a home IP doesn't get blocked by YouTube the way datacenter IPs do, and a
+container you control won't get its schedule switched off during the off-season.
+
+### Set it up
+
+1. **Make a token.** Create a fine-grained personal access token with **Contents:
+   read and write** on the `BeefMediumRare/JomezPro-Track-Generator` repo. That's the
+   only thing that can push tracks; commits are made under a plain bot name, unsigned.
+
+2. **Put it in a `.env`** next to `docker-compose.yml` (this file is gitignored):
+
+       GITHUB_TOKEN=github_pat_...
+       # optional overrides:
+       # SCAN_INTERVAL_SEC=3600
+       # MAX_AGE_DAYS=1
+
+3. **Start it:**
+
+       docker compose up -d trackgen-server
+       docker compose logs -f trackgen-server
+
+The container mounts nothing: it clones the repo into its own filesystem on start
+and keeps it in sync each round, so there's no host directory or volume to manage.
+`docker stop` exits cleanly; a restart just re-clones and carries on. Dedup is
+against the tracks already published to the repo, so nothing needs to persist
+between runs.
+
+### How it picks videos
+
+Each scan looks at the newest `MAX_SCAN_ENTRIES` uploads and keeps only the ones
+that are, in order: per-hole MPO coverage (title matches `COVERAGE_REGEX`,
+default `.*MPO.*(R[1-4]|FINAL)[FB]9.*`), not already turned into a track, and no
+older than `MAX_AGE_DAYS`. The age limit is also what stops the very first scan from
+trying to back-fill the whole channel.
+
+A video whose track would be useless — no HOLE chapters, or one that fails the
+extension's validation — is skipped and left for a later round, not committed. (A
+missing tournament logo only loses ad-skipping; that track is still useful, so it is
+committed.)
+
+### Knobs
+
+All are environment variables (see `src/config.py`):
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `GITHUB_TOKEN` | — | The PAT used to push. Required. |
+| `SCAN_INTERVAL_SEC` | `3600` | Seconds between scans. |
+| `MAX_AGE_DAYS` | `1` | Ignore videos older than this. |
+| `MAX_SCAN_ENTRIES` | `50` | How many newest uploads to look at. |
+| `COVERAGE_REGEX` | MPO pattern | Which titles count as coverage. |
+| `GIT_USER_NAME` / `GIT_USER_EMAIL` | bot identity | Who the commits are by. |
+
+### Try it without changing anything
+
+See what a scan would pick up — no downloads, no commits:
+
+    docker compose run --rm trackgen-server --discover-only
+
+Run a single round (respects `DRY_RUN=1` to generate but commit nothing):
+
+    docker compose run --rm -e DRY_RUN=1 trackgen-server --once
+
+To back-fill after a gap, widen the age window for one run:
+
+    docker compose run --rm -e MAX_AGE_DAYS=30 trackgen-server --once
+
+Server mode uses the same detection templates as the single-video command, so the
+calibration note below applies to it too — if JomezPro changes its graphics and
+previews stop being detected, remake the template.
+
 ## Settings
 
 The settings are in `src/config.py`. The ones you are most likely to change are

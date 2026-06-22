@@ -20,12 +20,28 @@ set KEEP_CACHE=1) to keep them for local iteration. See README.md for Docker usa
 import os
 import shutil
 import sys
+from dataclasses import dataclass
+from typing import Optional
 
 from src.config import CONFIG
 from src import download, frames, detect, track
 from src.sections import (build_sections, add_hole_previews, add_throws, add_sponsors,
                           throw_ends, is_hole_chapter)
 from src.track import format_timestamp
+
+
+@dataclass
+class GenerateResult:
+    """The outcome of one generate run, so callers (the CLI and the server loop)
+    can act on it. validated is True/False/None mirroring validate_with_extension
+    (None = couldn't validate). has_holes is False when the video had no HOLE
+    chapters, i.e. the track is a near-no-op — the server uses this to skip it."""
+    video_id: str
+    title: str
+    path: str
+    validated: Optional[bool]
+    has_holes: bool
+    reason: str = ""
 
 
 def _frames_dir(cfg, video_id):
@@ -72,7 +88,8 @@ def _generate(cfg, url_or_id, state):
     state["meta"] = meta
     print(f"  {meta['video_id']} — {meta['title']}")
     print(f"  duration {meta['duration']:.0f}s, {len(meta['chapters'])} chapters")
-    if not any(is_hole_chapter(c.get("title")) for c in meta["chapters"]):
+    has_holes = any(is_hole_chapter(c.get("title")) for c in meta["chapters"])
+    if not has_holes:
         print(
             "  WARNING: no HOLE chapters found. The whole video will play at the "
             "default speed (nothing skipped).",
@@ -150,10 +167,16 @@ def _generate(cfg, url_or_id, state):
         print("Validation: passed (extension validateTrack)")
     elif ok is False:
         print(f"Validation: FAILED — {msg}", file=sys.stderr)
-        return 1
     else:
         print(f"Validation: {msg}", file=sys.stderr)
-    return 0
+    return GenerateResult(
+        video_id=meta["video_id"],
+        title=meta["title"],
+        path=path,
+        validated=ok,
+        has_holes=has_holes,
+        reason="" if has_holes else "no HOLE chapters",
+    )
 
 
 def cmd_calibrate(url_or_id):
@@ -183,7 +206,10 @@ def main(argv):
             print("usage: generate.py calibrate <url|id>", file=sys.stderr)
             return 2
         return cmd_calibrate(args[1])
-    return cmd_generate(args[0])
+    result = cmd_generate(args[0])
+    # Non-zero only when the track was written but the extension rejected it,
+    # matching the previous exit-code contract.
+    return 1 if result.validated is False else 0
 
 
 if __name__ == "__main__":

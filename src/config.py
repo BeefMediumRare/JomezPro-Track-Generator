@@ -25,6 +25,26 @@ def _env_bool(name, default):
     return value.strip().lower() in ("1", "true", "yes", "on")
 
 
+def _env_int(name, default):
+    value = os.environ.get(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+def _env_float(name, default):
+    value = os.environ.get(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
 @dataclass
 class Config:
     # --- Where things live (host paths are bind-mounted in Docker) ---
@@ -115,6 +135,31 @@ class Config:
     # Hole previews: slower on round 1 (you haven't seen the hole), faster after.
     preview_speed_round1: str = "2"
     preview_speed_other: str = "3"
+
+    # --- Server / cron mode (serve.py) ---
+    # The channel to scan, and the rule for "this is per-hole tournament coverage".
+    # The regex is matched (case-insensitive) against the video title; it picks the
+    # MPO per-hole videos (e.g. "... | MPO R1F9 | ...", "... | MPO FINALB9 | ...")
+    # and leaves replays, interviews and FPO coverage out.
+    channel_url: str = field(default_factory=lambda: _env("CHANNEL_URL", "https://www.youtube.com/@JomezPro/videos"))
+    coverage_regex: str = field(default_factory=lambda: _env("COVERAGE_REGEX", r".*MPO.*(R[1-4]|FINAL)[FB]9.*"))
+    # How often the server wakes up to scan, and how far back it looks. The age
+    # bound also stops the very first scan (empty tracks dir) from pulling the whole
+    # back catalogue — only videos this fresh are ever downloaded.
+    scan_interval_sec: int = field(default_factory=lambda: _env_int("SCAN_INTERVAL_SEC", 3600))
+    max_age_days: float = field(default_factory=lambda: _env_float("MAX_AGE_DAYS", 1.0))
+    # How many of the newest uploads to look at per scan. The channel lists newest
+    # first, so a handful covers a tournament day with room to spare.
+    max_scan_entries: int = field(default_factory=lambda: _env_int("MAX_SCAN_ENTRIES", 50))
+    # The repo checkout the server commits tracks into (cloned on first run). Its
+    # tracks/JomezPro is where generated tracks land — see OUTPUT_DIR wiring in serve.py.
+    repo_dir: str = field(default_factory=lambda: _env("REPO_DIR", ".repo"))
+    repo_url: str = field(default_factory=lambda: _env("REPO_URL", "https://github.com/BeefMediumRare/JomezPro-Track-Generator.git"))
+    repo_branch: str = field(default_factory=lambda: _env("REPO_BRANCH", "main"))
+    # The bot identity for the unsigned commits the server pushes. The push token is
+    # read from the GITHUB_TOKEN env var only — never stored here or in .git/config.
+    git_user_name: str = field(default_factory=lambda: _env("GIT_USER_NAME", "jomez-track-bot"))
+    git_user_email: str = field(default_factory=lambda: _env("GIT_USER_EMAIL", "jomez-track-bot@users.noreply.github.com"))
 
     # --- Download target: 720p video, for crisp graphics to match against ---
     # Prefer a video-only stream (no audio: we never use it, and it avoids a merge).
