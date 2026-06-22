@@ -1,3 +1,7 @@
 yt-dlp
+# The JavaScript challenge-solver scripts yt-dlp runs (via deno) to extract
+# YouTube's full web-client formats. Without them yt-dlp drops to a degraded
+# client whose downloads intermittently 403. Permissive (Unlicense/MIT/ISC).
+yt-dlp-ejs
 opencv-python-headless
 numpy

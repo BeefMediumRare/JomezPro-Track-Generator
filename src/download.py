@@ -25,6 +25,9 @@ def fetch(url_or_id, cfg):
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
+        # Ride out transient hiccups (the odd 403 / dropped fragment) before failing.
+        "retries": 5,
+        "fragment_retries": 5,
         # Keep the muxed file as-is; we only read frames from it.
     }
 
