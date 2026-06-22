@@ -120,6 +120,12 @@ class Config:
     # for long enough, inside a hole, is an ad.
     sponsor_window: int = 5            # rolling-average window (seconds) for the signal
     sponsor_min_absent: int = 10       # logo gone at least this long to count as an ad
+    # A logo pixel barely moves across play frames; below this temporal std (on the
+    # fixed-height grayscale) a pixel counts as stable. Set above the overlay's own
+    # flicker (semi-transparent logos let some background through) but well below how
+    # much real footage moves, so the logo separates from the background.
+    logo_std_max: float = 30.0
+    logo_min_blob: int = 5             # drop stable specks smaller than this (px) when finding the logo
     logo_present_threshold: float = 0.3  # smoothed logo-pixel fraction below this = absent
     logo_hue_tolerance: int = 12       # hue band (+/-) around the sampled logo hue
     logo_sat_min: int = 50

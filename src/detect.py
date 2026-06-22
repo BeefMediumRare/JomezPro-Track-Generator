@@ -71,9 +71,17 @@ def detect(frames, specs):
 def derive_logo(frames_subset, cfg):
     """Find the tournament logo in the top-left corner from a set of play frames.
     The logo sits at a fixed spot while the background moves, so across frames its
-    pixels have low variance and the background's is high. We threshold the variance
-    map (Otsu) to a logo mask, take its bounding box, and sample the logo's hue from
-    the masked pixels (so it adapts to whatever colour the logo is this season).
+    pixels barely change (low temporal variance) and the background's vary a lot. We
+    pick the stable pixels as the logo mask, take its bounding box, and sample the
+    logo's hue from those pixels (so it adapts to whatever colour the logo is this
+    season).
+
+    Stable means low variance in absolute terms — a pixel that hardly moves across
+    the play frames. An adaptive split (Otsu) was tried first but flooded the mask on
+    low-motion indoor footage: when much of the background is also fairly still, Otsu
+    lands its threshold mid-histogram and swallows half the corner, so the logo can't
+    be told from the background. A fixed motion floor isolates the overlay cleanly:
+    it barely moves whatever the footage does.
 
     frames_subset: [(second, path)], best sampled across the whole video so the
     backgrounds differ (one static stretch would leave its background looking as
@@ -90,9 +98,16 @@ def derive_logo(frames_subset, cfg):
         return None
 
     std = np.stack(grays).std(0)
-    sn = (std / (std.max() + 1e-6) * 255).astype(np.uint8)
-    _, m = cv2.threshold(sn, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    mask = m > 0
+    mask = std < cfg.logo_std_max
+    # Drop isolated specks: the odd background pixel that happened to hold still is
+    # not the logo. Keeping only sizeable connected blobs leaves the logo's strokes
+    # (hundreds of pixels each) and clears the stragglers, so the bounding box is the
+    # logo and not the whole corner.
+    num, labels, stats, _ = cv2.connectedComponentsWithStats(mask.astype(np.uint8), connectivity=8)
+    mask = np.zeros_like(mask)
+    for i in range(1, num):
+        if stats[i, cv2.CC_STAT_AREA] >= cfg.logo_min_blob:
+            mask |= labels == i
     # Sanity: the logo is a small, stable patch against a moving background. A real
     # logo is a few percent of the corner; if the mask is much bigger, or the
     # "background" isn't much more variable than the "logo", the camera didn't move
