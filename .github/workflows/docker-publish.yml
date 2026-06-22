@@ -45,6 +45,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Push a single plain image manifest, not an OCI index. Buildx otherwise
+          # attaches a provenance attestation (an unknown/unknown entry), which the
+          # legacy Synology Docker app can't parse ("Registry returned bad result").
+          provenance: false
+          sbom: false
           # Reuse layers between runs so a code-only change doesn't reinstall ffmpeg/opencv.
           cache-from: type=gha
           cache-to: type=gha,mode=max
