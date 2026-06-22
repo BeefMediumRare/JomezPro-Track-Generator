@@ -120,6 +120,20 @@ and keeps it in sync each round, so there's no host directory or volume to manag
 against the tracks already published to the repo, so nothing needs to persist
 between runs.
 
+### Deploying the prebuilt image (no local build)
+
+`docker-compose.yml` builds the image locally. On a server you'd rather pull the
+image that CI already built and published to GHCR, so there's a second file,
+`docker-compose.server.yml`, that does exactly that — same service, but `image:`
+instead of `build:`, no mounts, and `pull_policy: always` so it grabs the newest
+`latest` each time it comes up:
+
+    docker compose -f docker-compose.server.yml up -d
+
+On Synology DSM 7.2+ this is a Container Manager **Project**: point it at this file,
+put your `GITHUB_TOKEN` in a `.env` beside it (or the Project's environment field),
+and bring it up. The image is `ghcr.io/beefmediumrare/jomezpro-track-generator:latest`.
+
 ### How it picks videos
 
 Each scan looks at the newest `MAX_SCAN_ENTRIES` uploads and keeps only the ones

@@ -1,0 +1,27 @@
+# Deploy file for the homelab server (e.g. a Synology Container Manager Project).
+# Unlike docker-compose.yml, this pulls the prebuilt image from GHCR instead of
+# building it, so there's no build context to ship to the NAS.
+#
+# Provide your token in a .env file next to this one (or in the Project's
+# environment field):
+#
+#     GITHUB_TOKEN=github_pat_...
+#     # optional overrides:
+#     # SCAN_INTERVAL_SEC=3600
+#     # MAX_AGE_DAYS=1
+services:
+  trackgen-server:
+    image: ghcr.io/beefmediumrare/jomezpro-track-generator:latest
+    container_name: jomez-track-generator
+    pull_policy: always              # grab the newest :latest each time it comes up
+    entrypoint: ["python", "serve.py"]
+    restart: unless-stopped
+    # No mounts: the repo is cloned fresh inside the container and downloads are
+    # cleaned up after each video, so there's nothing to persist.
+    environment:
+      - REPO_DIR=/repo
+      - GITHUB_TOKEN=${GITHUB_TOKEN:?set GITHUB_TOKEN in .env}
+      - SCAN_INTERVAL_SEC=${SCAN_INTERVAL_SEC:-3600}
+      - MAX_AGE_DAYS=${MAX_AGE_DAYS:-1}
+      - GIT_USER_NAME=${GIT_USER_NAME:-jomez-track-bot}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-jomez-track-bot@users.noreply.github.com}
