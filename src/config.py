@@ -140,7 +140,7 @@ class Config:
     # A detected putt plays normal speed for this many seconds before it — tighter than
     # a throw, since a putt is short. And a throw end this soon after a putt is the putt
     # being scored, not a separate throw, so it's dropped (the putt window covers it).
-    putt_lead: int = 5
+    putt_lead: int = 3
     putt_suppress_sec: int = 10
 
     # --- Sponsor blocks (baked-in ads): the tournament logo vanishes during them ---
