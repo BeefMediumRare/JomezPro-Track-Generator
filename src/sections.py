@@ -179,25 +179,54 @@ def throw_ends(present_seconds, signals, cfg):
     return sorted(set(ends))
 
 
-def _throw_windows(present_seconds, signals, cfg):
-    """A normal-speed window [end - throw_lead, end] for each throw end, merged
-    where they overlap."""
-    windows = []
-    for end in throw_ends(present_seconds, signals, cfg):
-        a, b = end - cfg.throw_lead, end
-        if windows and a <= windows[-1][1]:
-            windows[-1][1] = max(windows[-1][1], b)
+def made_putt_events(putt_seconds, cfg):
+    """Seconds where a putt was made. The reveal-colour detection (detect.made_putts)
+    flickers a little, so seconds within 2s are bridged into a run and a run must last
+    debounce_frames to count; the run's start is the putt moment. A real putt comes
+    clustered with the rest of the group putting out on the same hole, so an event
+    counts only if another event falls within putt_neighbor_sec — a lone reveal (an ace
+    or a throw-in) is dropped. Pure."""
+    present = sorted({int(round(t)) for t in putt_seconds})
+    if not present:
+        return []
+    runs = [[present[0], present[0]]]
+    for t in present[1:]:
+        if t - runs[-1][1] <= 2:   # bridge a dropped frame inside one reveal
+            runs[-1][1] = t
         else:
-            windows.append([a, b])
-    return windows
+            runs.append([t, t])
+    events = [a for a, b in runs if b - a + 1 >= cfg.debounce_frames]
+    return [e for e in events
+            if any(o != e and abs(o - e) <= cfg.putt_neighbor_sec for o in events)]
 
 
-def add_throws(sections, present_seconds, signals, cfg):
+def _merge_windows(events):
+    """Merge (end, lead) look-ahead events into normal-speed [start, end] windows.
+    Each event spans [end - lead, end]; overlapping spans join. Sorted by start so a
+    putt's short window and a throw's long one merge correctly whatever their leads."""
+    intervals = sorted([end - lead, end] for end, lead in events)
+    merged = []
+    for a, b in intervals:
+        if merged and a <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    return merged
+
+
+def add_throws(sections, present_seconds, signals, putt_seconds, cfg):
     """Split each HOLE section into 'hole' and 'throw' segments. The card-present
-    detection marks where throws happen; individual throws are the look-ahead
-    windows ending at each detected throw end. Pure: takes detections, returns
-    refined sections."""
-    windows = _throw_windows(present_seconds, signals, cfg)
+    detection marks where throws happen; individual throws are the look-ahead windows
+    ending at each detected throw end (throw_lead seconds) or made putt (the tighter
+    putt_lead). A putt overwrites the throw it ends: any throw end within
+    putt_suppress_sec after a putt is the putt being scored, not a separate throw, so
+    it's dropped and the putt's short window stands in its place. Pure: takes
+    detections, returns refined sections."""
+    putts = made_putt_events(putt_seconds, cfg)
+    ends = [e for e in throw_ends(present_seconds, signals, cfg)
+            if not any(0 <= e - p <= cfg.putt_suppress_sec for p in putts)]
+    windows = _merge_windows([(e, cfg.throw_lead) for e in ends] +
+                             [(p, cfg.putt_lead) for p in putts])
     out = []
     for s in sections:
         if s.kind != "hole":

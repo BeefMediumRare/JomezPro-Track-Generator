@@ -26,7 +26,7 @@ from typing import Optional
 from src.config import CONFIG
 from src import download, frames, detect, track
 from src.sections import (build_sections, add_hole_previews, add_throws, add_sponsors,
-                          throw_ends, is_hole_chapter)
+                          throw_ends, made_putt_events, is_hole_chapter)
 from src.track import format_timestamp
 
 
@@ -124,10 +124,17 @@ def _generate(cfg, url_or_id, state):
             diffs = detect.card_diffs(fr, {"card": cfg.diff_box, "counter": cfg.counter_box})
             signals = [(diffs["card"], cfg.transition_threshold),
                        (diffs["counter"], cfg.counter_threshold)]
+            # Made putts: the player card floods the result colour when a hole is
+            # finished. Scanned only over card-present frames (a reveal needs the
+            # card), then gated to each hole's closing stretch inside add_throws.
+            present_set = set(present["throw"])
+            card_frames = [(s, p) for s, p in fr if s in present_set]
+            putts = detect.made_putts(card_frames, specs["throw"][0], cfg)
             ends = throw_ends(present["throw"], signals, cfg)
+            n_putts = len(made_putt_events(putts, cfg))
             print(f"  player card seen in {len(present['throw'])} of {len(fr)} frames, "
-                  f"{len(ends)} throws (look-ahead)")
-            analysis.sections = add_throws(analysis.sections, present["throw"], signals, cfg)
+                  f"{len(ends)} throws (look-ahead), {n_putts} made putts")
+            analysis.sections = add_throws(analysis.sections, present["throw"], signals, putts, cfg)
 
             # Sponsor blocks: the tournament logo (top-left) vanishes during baked-in
             # ads. Derive the logo from play frames spread across the whole video

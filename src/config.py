@@ -114,6 +114,35 @@ class Config:
     # or the card disappearing) plays normal speed for this many seconds before it.
     throw_lead: int = 18
 
+    # --- Made-putt detection (the score reveal flashes the whole card one colour) ---
+    # When a hole is finished the player card floods the result colour (blue eagle,
+    # green birdie, gray par, red bogey, purple double). We sample three small boxes
+    # on three normally-DIFFERENT card elements and call it a made putt when all three
+    # agree on one colour — they only converge during a flood. The boxes are offsets
+    # (dx0, dy0, dx1, dy1) in fixed-height pixels from the matched THROW-label top-left
+    # (the card sits at a fixed spot relative to it, in every layout), so they track
+    # the card without re-calibration:
+    #   A = 9-hole icon strip (far right, clear of the centred result word)
+    #   B = blue name bar     C = white running-total box
+    made_putt_boxes: tuple = ((-14, 13, 1, 26), (8, -28, 22, -16), (28, -28, 41, -16))
+    putt_hue_tol: int = 16        # max hue spread (circular) for a coloured agreement
+    putt_sat_min: int = 80        # min saturation for a coloured (non-gray) agreement
+    putt_gray_sat_max: int = 55   # below this saturation all three count as gray (par)
+    putt_gray_val_min: int = 60   # ...as long as they're brighter than this (not black)
+    putt_gray_val_max: int = 240  # ...and dimmer than this (not the white score box)
+    # A real putt comes clustered with the rest of the group putting out on the same
+    # hole, so reveal events come in bunches; an ace or a throw-in is a lone reveal (the
+    # same flood, but by itself). So a putt counts only if another putt event falls
+    # within this many seconds. This filters the singular ace/throw-in, and unlike a
+    # "closing stretch of the hole" window it still holds on the final hole, whose
+    # chapter swallows the winner ceremony and interviews.
+    putt_neighbor_sec: int = 20
+    # A detected putt plays normal speed for this many seconds before it — tighter than
+    # a throw, since a putt is short. And a throw end this soon after a putt is the putt
+    # being scored, not a separate throw, so it's dropped (the putt window covers it).
+    putt_lead: int = 5
+    putt_suppress_sec: int = 10
+
     # --- Sponsor blocks (baked-in ads): the tournament logo vanishes during them ---
     # The logo is derived per video, then its presence is tracked as the fraction of
     # logo-coloured pixels in its box. Smoothed over a window; below the threshold

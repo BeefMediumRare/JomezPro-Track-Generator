@@ -144,6 +144,58 @@ def logo_presence(frames, logo, cfg):
     return out
 
 
+def _putt_agree(cols, cfg):
+    """True when all three sampled boxes show one colour: either all low-saturation
+    gray (par) or one saturated hue (eagle/birdie/bogey/double). cols is a list of
+    (hue, sat, val) medians."""
+    hs = [c[0] for c in cols]
+    ss = [c[1] for c in cols]
+    vs = [c[2] for c in cols]
+    if all(s < cfg.putt_gray_sat_max for s in ss) and \
+       all(cfg.putt_gray_val_min < v < cfg.putt_gray_val_max for v in vs):
+        return True
+    spread = max(hs) - min(hs)
+    span = min(spread, 180 - spread)   # hue is circular (0..179); red wraps around
+    return span <= cfg.putt_hue_tol and all(s >= cfg.putt_sat_min for s in ss)
+
+
+def made_putts(frames, throw_template, cfg):
+    """Seconds where the player card flooded one colour — a finished hole (a made
+    putt). The card sits at a fixed offset from the THROW label, so each frame is
+    located by matching that label, then three small boxes are sampled at fixed
+    offsets from it (see cfg.made_putt_boxes) and checked for a single-colour
+    agreement. Frames without the card (no label match) can't show a reveal and are
+    skipped. frames: [(second, path)]. Returns [seconds]."""
+    th, tw = throw_template.shape
+    out = []
+    for second, path in frames:
+        bgr = cv2.imread(path)
+        if bgr is None:
+            continue
+        gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        h, w = gray.shape
+        x0, y0, x1, y1 = _box_px(cfg.throw_search_box, h, w)
+        region = gray[y0:y1, x0:x1]
+        if region.shape[0] < th or region.shape[1] < tw:
+            continue
+        res = cv2.matchTemplate(region, throw_template, cv2.TM_CCOEFF_NORMED)
+        _, score, _, loc = cv2.minMaxLoc(res)
+        if score < cfg.throw_threshold:
+            continue
+        tx, ty = x0 + loc[0], y0 + loc[1]
+        cols, inside = [], True
+        for dx0, dy0, dx1, dy1 in cfg.made_putt_boxes:
+            bx0, by0, bx1, by1 = tx + dx0, ty + dy0, tx + dx1, ty + dy1
+            if bx0 < 0 or by0 < 0 or bx1 > w or by1 > h:
+                inside = False
+                break
+            hsv = cv2.cvtColor(bgr[by0:by1, bx0:bx1], cv2.COLOR_BGR2HSV)
+            cols.append(tuple(int(np.median(hsv[:, :, i])) for i in range(3)))
+        if inside and _putt_agree(cols, cfg):
+            out.append(second)
+    return out
+
+
 def card_diffs(frames, boxes):
     """Mean absolute frame-to-frame difference inside each box, per second. A big
     value means that region changed. boxes: {name: box_frac}. Returns
