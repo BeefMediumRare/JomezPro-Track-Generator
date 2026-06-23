@@ -19,8 +19,8 @@ SCHEMA_VERSION = 1
 # settings, so that's the extension's to show.
 TRACK_TITLE = "Focus on Throws"
 TRACK_DESCRIPTION = (
-    "Throws play at normal speed. Holes and drone previews are sped up; "
-    "intros, sponsors and outros are skipped."
+    "Throws and made putts play at normal speed. The rest of each hole, including "
+    "the opening drone flyover, is sped up; intros, sponsors and outros are skipped."
 )
 
 
