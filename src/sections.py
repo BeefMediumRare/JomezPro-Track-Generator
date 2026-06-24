@@ -10,6 +10,7 @@ track-building step's job (see track.sections_to_cues).
 Right now sections come only from the YouTube chapters, classified by kind:
   - "hole"        -> a HOLE chapter (hole previews and throws will later subdivide)
   - "leaderboard" -> the closing leaderboard recap
+  - "leaderboard_open" -> a LEADERBOARD right after START (front-9 recap; skipped)
   - "intro"       -> any non-hole chapter before the first hole
   - "outro"       -> any other non-hole chapter (after the holes)
 
@@ -200,13 +201,31 @@ def made_putt_events(putt_seconds, cfg):
             if any(o != e and abs(o - e) <= cfg.putt_neighbor_sec for o in events)]
 
 
-def _merge_windows(events):
-    """Merge (end, lead) look-ahead events into normal-speed [start, end] windows.
-    Each event spans [end - lead, end]; overlapping spans join. Sorted by start so a
-    putt's short window and a throw's long one merge correctly whatever their leads."""
-    intervals = sorted([end - lead, end] for end, lead in events)
+def _throw_windows(ends, cfg):
+    """Normal-speed [start, end] window for each throw, from the sorted throw-end
+    seconds (transitions, and the card vanishing). The transition lands just after the
+    disc has come to rest, so the window ends throw_end_pad seconds before it; the
+    throw plays for up to throw_lead seconds before that, but never starts until
+    throw_min_gap seconds after the previous throw end (the next player needs a beat to
+    set up). So a closely-spaced pair of ends yields a window shorter than throw_lead,
+    and one closer than throw_end_pad + throw_min_gap yields none."""
+    ends = sorted(ends)
+    windows = []
+    for i, e in enumerate(ends):
+        end = e - cfg.throw_end_pad
+        start = end - cfg.throw_lead
+        if i > 0:
+            start = max(start, ends[i - 1] + cfg.throw_min_gap)
+        if end > start:
+            windows.append((start, end))
+    return windows
+
+
+def _merge_intervals(intervals):
+    """Join overlapping [start, end] windows into the minimal set of disjoint ones.
+    Sorted by start so a putt's short window and a throw's long one merge correctly."""
     merged = []
-    for a, b in intervals:
+    for a, b in sorted(intervals):
         if merged and a <= merged[-1][1]:
             merged[-1][1] = max(merged[-1][1], b)
         else:
@@ -217,16 +236,16 @@ def _merge_windows(events):
 def add_throws(sections, present_seconds, signals, putt_seconds, cfg):
     """Split each HOLE section into 'hole' and 'throw' segments. The card-present
     detection marks where throws happen; individual throws are the look-ahead windows
-    ending at each detected throw end (throw_lead seconds) or made putt (the tighter
-    putt_lead). A putt overwrites the throw it ends: any throw end within
-    putt_suppress_sec after a putt is the putt being scored, not a separate throw, so
-    it's dropped and the putt's short window stands in its place. Pure: takes
+    ending a little before each detected throw end (see _throw_windows) or at each made
+    putt (the tighter putt_lead). A putt overwrites the throw it ends: any throw end
+    within putt_suppress_sec after a putt is the putt being scored, not a separate
+    throw, so it's dropped and the putt's short window stands in its place. Pure: takes
     detections, returns refined sections."""
     putts = made_putt_events(putt_seconds, cfg)
     ends = [e for e in throw_ends(present_seconds, signals, cfg)
             if not any(0 <= e - p <= cfg.putt_suppress_sec for p in putts)]
-    windows = _merge_windows([(e, cfg.throw_lead) for e in ends] +
-                             [(p, cfg.putt_lead) for p in putts])
+    windows = _merge_intervals(_throw_windows(ends, cfg) +
+                               [(p - cfg.putt_lead, p) for p in putts])
     out = []
     for s in sections:
         if s.kind != "hole":
@@ -324,7 +343,10 @@ def build_sections(duration, chapters, title=""):
         if is_hole_chapter(ctitle):
             kind = "hole"
         elif is_leaderboard_chapter(ctitle):
-            kind = "leaderboard"
+            # A leaderboard before the first hole is the opening recap (right after
+            # START) — you've already watched the earlier nine, so it's skipped. The
+            # leaderboard after the holes is the closing recap and keeps its kind.
+            kind = "leaderboard_open" if i < first_hole else "leaderboard"
         elif i < first_hole:
             kind = "intro"
         else:

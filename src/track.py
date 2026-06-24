@@ -59,10 +59,14 @@ def speed_for_kind(kind, round_bucket, nine, cfg):
         # Round 1 you haven't seen the hole, so the preview plays fast. Later rounds
         # repeat it, so it plays faster still.
         return cfg.preview_speed_round1 if round_bucket == "first" else cfg.preview_speed_other
+    if kind == "leaderboard":
+        # The final standings (back 9) are worth a normal-speed watch; a front-9
+        # leaderboard is only a mid-round check-in, so it plays faster.
+        return cfg.speed_leaderboard_f9 if nine == "front" else cfg.speed_leaderboard
     return {
         "hole": cfg.speed_default,
         "throw": cfg.speed_throw,
-        "leaderboard": cfg.speed_leaderboard,
+        "leaderboard_open": cfg.speed_skip,
         "sponsor": cfg.speed_skip,
     }.get(kind, cfg.speed_default)
 

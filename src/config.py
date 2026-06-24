@@ -112,7 +112,17 @@ class Config:
     throw_max_absent: int = 2
     # Individual throws are found by the look-ahead: each throw end (a transition,
     # or the card disappearing) plays normal speed for this many seconds before it.
-    throw_lead: int = 18
+    throw_lead: int = 15
+    # Two refinements on top of the look-ahead, so a throw window can be shorter
+    # than throw_lead:
+    #  - the transition fires a beat after the disc has already settled, so the
+    #    window ends this many seconds before the detected transition;
+    throw_end_pad: int = 2
+    #  - the broadcast cuts to the next player a little before they actually throw,
+    #    so a window starts no sooner than this many seconds after the previous
+    #    transition (a closely-spaced pair of transitions yields a short window, and
+    #    one closer than throw_end_pad + throw_min_gap yields none).
+    throw_min_gap: int = 3
 
     # --- Made-putt detection (the score reveal flashes the whole card one colour) ---
     # When a hole is finished the player card floods the result colour (blue eagle,
@@ -165,6 +175,7 @@ class Config:
     # 1 normal, 2 fast, 3 faster, 4 skip.
     speed_throw: str = "1"            # the parts worth watching, at normal speed
     speed_leaderboard: str = "1"      # the closing leaderboard recap, at normal speed
+    speed_leaderboard_f9: str = "3"   # on a front 9 it's only a mid-round check-in, so play it faster
     speed_default: str = "2"          # walking / setup / banter
     speed_skip: str = "4"             # intro, sponsor lists, and other non-play chapters
     # Hole previews: slower on round 1 (you haven't seen the hole), faster after.
