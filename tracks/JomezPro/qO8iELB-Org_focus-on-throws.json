@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 1,
+  "youtubeVideoId": "qO8iELB-Org",
+  "title": "Focus on Throws",
+  "description": "Throws and made putts play at normal speed. The rest of each hole, including the opening drone flyover, is sped up; intros, sponsors and outros are skipped.",
+  "cues": [
+    {
+      "timestamp": "0:00",
+      "speed": "4"
+    },
+    {
+      "timestamp": "0:36",
+      "speed": "1"
+    },
+    {
+      "timestamp": "0:56",
+      "speed": "3"
+    },
+    {
+      "timestamp": "1:23",
+      "speed": "1"
+    },
+    {
+      "timestamp": "1:56",
+      "speed": "2"
+    },
+    {
+      "timestamp": "1:58",
+      "speed": "1"
+    },
+    {
+      "timestamp": "2:16",
+      "speed": "2"
+    },
+    {
+      "timestamp": "2:23",
+      "speed": "1"
+    },
+    {
+      "timestamp": "2:49",
+      "speed": "2"
+    },
+    {
+      "timestamp": "3:15",
+      "speed": "1"
+    },
+    {
+      "timestamp": "3:56",
+      "speed": "2"
+    },
+    {
+      "timestamp": "3:57",
+      "speed": "1"
+    },
+    {
+      "timestamp": "4:00",
+      "speed": "2"
+    },
+    {
+      "timestamp": "4:06",
+      "speed": "1"
+    },
+    {
+      "timestamp": "4:09",
+      "speed": "2"
+    },
+    {
+      "timestamp": "4:16",
+      "speed": "1"
+    },
+    {
+      "timestamp": "4:19",
+      "speed": "2"
+    },
+    {
+      "timestamp": "4:21",
+      "speed": "1"
+    },
+    {
+      "timestamp": "5:51",
+      "speed": "3"
+    },
+    {
+      "timestamp": "6:18",
+      "speed": "1"
+    },
+    {
+      "timestamp": "6:26",
+      "speed": "2"
+    },
+    {
+      "timestamp": "6:36",
+      "speed": "1"
+    },
+    {
+      "timestamp": "6:39",
+      "speed": "2"
+    },
+    {
+      "timestamp": "6:50",
+      "speed": "1"
+    },
+    {
+      "timestamp": "6:53",
+      "speed": "2"
+    },
+    {
+      "timestamp": "6:54",
+      "speed": "1"
+    },
+    {
+      "timestamp": "7:52",
+      "speed": "2"
+    },
+    {
+      "timestamp": "7:55",
+      "speed": "1"
+    },
+    {
+      "timestamp": "8:27",
+      "speed": "2"
+    },
+    {
+      "timestamp": "8:31",
+      "speed": "1"
+    },
+    {
+      "timestamp": "9:42",
+      "speed": "2"
+    },
+    {
+      "timestamp": "9:45",
+      "speed": "1"
+    },
+    {
+      "timestamp": "9:48",
+      "speed": "2"
+    },
+    {
+      "timestamp": "9:56",
+      "speed": "1"
+    },
+    {
+      "timestamp": "9:59",
+      "speed": "2"
+    },
+    {
+      "timestamp": "10:05",
+      "speed": "1"
+    },
+    {
+      "timestamp": "10:08",
+      "speed": "2"
+    },
+    {
+      "timestamp": "10:11",
+      "speed": "1"
+    },
+    {
+      "timestamp": "10:14",
+      "speed": "2"
+    },
+    {
+      "timestamp": "10:17",
+      "speed": "1"
+    },
+    {
+      "timestamp": "11:27",
+      "speed": "3"
+    },
+    {
+      "timestamp": "11:54",
+      "speed": "2"
+    },
+    {
+      "timestamp": "11:56",
+      "speed": "1"
+    },
+    {
+      "timestamp": "12:30",
+      "speed": "2"
+    },
+    {
+      "timestamp": "12:31",
+      "speed": "1"
+    },
+    {
+      "timestamp": "13:06",
+      "speed": "2"
+    },
+    {
+      "timestamp": "13:08",
+      "speed": "1"
+    },
+    {
+      "timestamp": "13:42",
+      "speed": "2"
+    },
+    {
+      "timestamp": "14:05",
+      "speed": "1"
+    },
+    {
+      "timestamp": "14:44",
+      "speed": "2"
+    },
+    {
+      "timestamp": "14:46",
+      "speed": "1"
+    },
+    {
+      "timestamp": "14:49",
+      "speed": "2"
+    },
+    {
+      "timestamp": "15:00",
+      "speed": "1"
+    },
+    {
+      "timestamp": "15:03",
+      "speed": "2"
+    },
+    {
+      "timestamp": "15:05",
+      "speed": "1"
+    },
+    {
+      "timestamp": "15:48",
+      "speed": "2"
+    },
+    {
+      "timestamp": "15:49",
+      "speed": "1"
+    },
+    {
+      "timestamp": "16:25",
+      "speed": "2"
+    },
+    {
+      "timestamp": "16:44",
+      "speed": "4"
+    },
+    {
+      "timestamp": "16:56",
+      "speed": "3"
+    },
+    {
+      "timestamp": "17:22",
+      "speed": "2"
+    },
+    {
+      "timestamp": "17:28",
+      "speed": "1"
+    },
+    {
+      "timestamp": "17:46",
+      "speed": "2"
+    },
+    {
+      "timestamp": "17:47",
+      "speed": "1"
+    },
+    {
+      "timestamp": "19:34",
+      "speed": "2"
+    },
+    {
+      "timestamp": "19:35",
+      "speed": "1"
+    },
+    {
+      "timestamp": "19:53",
+      "speed": "2"
+    },
+    {
+      "timestamp": "19:55",
+      "speed": "1"
+    },
+    {
+      "timestamp": "19:58",
+      "speed": "2"
+    },
+    {
+      "timestamp": "20:05",
+      "speed": "1"
+    },
+    {
+      "timestamp": "20:08",
+      "speed": "2"
+    },
+    {
+      "timestamp": "20:09",
+      "speed": "1"
+    },
+    {
+      "timestamp": "20:12",
+      "speed": "2"
+    },
+    {
+      "timestamp": "20:22",
+      "speed": "3"
+    },
+    {
+      "timestamp": "20:48",
+      "speed": "2"
+    },
+    {
+      "timestamp": "20:56",
+      "speed": "1"
+    },
+    {
+      "timestamp": "21:14",
+      "speed": "2"
+    },
+    {
+      "timestamp": "21:16",
+      "speed": "1"
+    },
+    {
+      "timestamp": "21:34",
+      "speed": "2"
+    },
+    {
+      "timestamp": "21:35",
+      "speed": "1"
+    },
+    {
+      "timestamp": "23:07",
+      "speed": "2"
+    },
+    {
+      "timestamp": "23:09",
+      "speed": "1"
+    },
+    {
+      "timestamp": "23:12",
+      "speed": "2"
+    },
+    {
+      "timestamp": "23:23",
+      "speed": "1"
+    },
+    {
+      "timestamp": "23:26",
+      "speed": "2"
+    },
+    {
+      "timestamp": "23:36",
+      "speed": "1"
+    },
+    {
+      "timestamp": "23:39",
+      "speed": "2"
+    },
+    {
+      "timestamp": "23:44",
+      "speed": "1"
+    },
+    {
+      "timestamp": "23:47",
+      "speed": "2"
+    },
+    {
+      "timestamp": "23:49",
+      "speed": "1"
+    },
+    {
+      "timestamp": "24:18",
+      "speed": "2"
+    },
+    {
+      "timestamp": "24:19",
+      "speed": "3"
+    },
+    {
+      "timestamp": "24:46",
+      "speed": "1"
+    },
+    {
+      "timestamp": "25:07",
+      "speed": "2"
+    },
+    {
+      "timestamp": "25:15",
+      "speed": "1"
+    },
+    {
+      "timestamp": "25:33",
+      "speed": "2"
+    },
+    {
+      "timestamp": "25:38",
+      "speed": "1"
+    },
+    {
+      "timestamp": "25:56",
+      "speed": "2"
+    },
+    {
+      "timestamp": "25:58",
+      "speed": "1"
+    },
+    {
+      "timestamp": "26:16",
+      "speed": "2"
+    },
+    {
+      "timestamp": "26:17",
+      "speed": "1"
+    },
+    {
+      "timestamp": "27:50",
+      "speed": "2"
+    },
+    {
+      "timestamp": "27:52",
+      "speed": "1"
+    },
+    {
+      "timestamp": "28:11",
+      "speed": "2"
+    },
+    {
+      "timestamp": "28:17",
+      "speed": "1"
+    },
+    {
+      "timestamp": "28:20",
+      "speed": "2"
+    },
+    {
+      "timestamp": "28:27",
+      "speed": "1"
+    },
+    {
+      "timestamp": "28:30",
+      "speed": "2"
+    },
+    {
+      "timestamp": "28:40",
+      "speed": "4"
+    },
+    {
+      "timestamp": "29:15",
+      "speed": "3"
+    },
+    {
+      "timestamp": "29:42",
+      "speed": "1"
+    },
+    {
+      "timestamp": "30:06",
+      "speed": "2"
+    },
+    {
+      "timestamp": "30:07",
+      "speed": "1"
+    },
+    {
+      "timestamp": "30:25",
+      "speed": "2"
+    },
+    {
+      "timestamp": "30:56",
+      "speed": "1"
+    },
+    {
+      "timestamp": "31:46",
+      "speed": "2"
+    },
+    {
+      "timestamp": "31:51",
+      "speed": "1"
+    },
+    {
+      "timestamp": "31:54",
+      "speed": "2"
+    },
+    {
+      "timestamp": "31:55",
+      "speed": "1"
+    },
+    {
+      "timestamp": "31:58",
+      "speed": "2"
+    },
+    {
+      "timestamp": "32:01",
+      "speed": "3"
+    },
+    {
+      "timestamp": "32:28",
+      "speed": "2"
+    },
+    {
+      "timestamp": "32:34",
+      "speed": "1"
+    },
+    {
+      "timestamp": "33:13",
+      "speed": "2"
+    },
+    {
+      "timestamp": "33:14",
+      "speed": "1"
+    },
+    {
+      "timestamp": "34:28",
+      "speed": "2"
+    },
+    {
+      "timestamp": "34:31",
+      "speed": "1"
+    },
+    {
+      "timestamp": "34:34",
+      "speed": "2"
+    },
+    {
+      "timestamp": "34:43",
+      "speed": "1"
+    },
+    {
+      "timestamp": "34:46",
+      "speed": "2"
+    },
+    {
+      "timestamp": "34:47",
+      "speed": "1"
+    },
+    {
+      "timestamp": "34:50",
+      "speed": "2"
+    },
+    {
+      "timestamp": "34:52",
+      "speed": "1"
+    },
+    {
+      "timestamp": "34:55",
+      "speed": "2"
+    },
+    {
+      "timestamp": "34:59",
+      "speed": "3"
+    },
+    {
+      "timestamp": "35:26",
+      "speed": "2"
+    },
+    {
+      "timestamp": "35:31",
+      "speed": "1"
+    },
+    {
+      "timestamp": "35:49",
+      "speed": "2"
+    },
+    {
+      "timestamp": "35:50",
+      "speed": "1"
+    },
+    {
+      "timestamp": "36:45",
+      "speed": "2"
+    },
+    {
+      "timestamp": "36:51",
+      "speed": "1"
+    },
+    {
+      "timestamp": "37:09",
+      "speed": "2"
+    },
+    {
+      "timestamp": "37:10",
+      "speed": "1"
+    },
+    {
+      "timestamp": "38:13",
+      "speed": "2"
+    },
+    {
+      "timestamp": "38:17",
+      "speed": "1"
+    },
+    {
+      "timestamp": "38:20",
+      "speed": "2"
+    },
+    {
+      "timestamp": "38:34",
+      "speed": "1"
+    },
+    {
+      "timestamp": "38:37",
+      "speed": "2"
+    },
+    {
+      "timestamp": "38:49",
+      "speed": "1"
+    },
+    {
+      "timestamp": "38:52",
+      "speed": "2"
+    },
+    {
+      "timestamp": "38:56",
+      "speed": "1"
+    },
+    {
+      "timestamp": "38:59",
+      "speed": "2"
+    },
+    {
+      "timestamp": "39:06",
+      "speed": "1"
+    },
+    {
+      "timestamp": "40:00",
+      "speed": "4"
+    }
+  ]
+}
