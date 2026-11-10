@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "youtubeVideoId": "-Fhbwhz402c",
+  "title": "Focus on Throws",
+  "description": "Throws and made putts play at normal speed. The rest of each hole, including the opening drone flyover, is sped up; intros, sponsors and outros are skipped.",
+  "cues": [
+    {
+      "timestamp": "0:00",
+      "speed": "4"
+    },
+    {
+      "timestamp": "2:13",
+      "speed": "2"
+    },
+    {
+      "timestamp": "41:33",
+      "speed": "1"
+    },
+    {
+      "timestamp": "42:18",
+      "speed": "4"
+    }
+  ]
+}
